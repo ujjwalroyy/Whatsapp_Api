@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Animal CRUD</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link href="~/Content/site.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">Animal CRUD</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        @if (Session["UserEmail"] == null)
+                        {
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModallogin">
+                                Login
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="text-success me-2">Welcome, @Session["UserEmail"]</span>
+                            <a href="/User/Logout" class="btn btn-outline-danger">Logout</a>
+                        }
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <div class="modal fade"
+         id="exampleModallogin"
+         tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true"
+         dir="ltr">
+        <div class="modal-dialog modal-dialog-centered login-modal">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="login-left">
+                                <button type="button" class="btn-login-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <img src="/images/times-circle.svg" alt="" />
+                                </button>
+                                <div class="login-info">
+                                    <h3 class="welcome-heading mb-30">Welcome to Sharwe</h3>
+                                    <div class="login-info-list">
+                                        <h4 class="login-info-list-title mb-3">We are ready to provide you</h4>
+                                        <div class="d-flex align-items-center gap-2 mb-1 login-list-content">
+                                            <span><img src="/images/check.svg" alt="" /></span>
+                                            <p class="mb-0">View saved properties</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mb-1 login-list-content">
+                                            <span><img src="/images/check.svg" alt="" /></span>
+                                            <p class="mb-0">Keep search history across devices</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mb-1 login-list-content">
+                                            <span><img src="/images/check.svg" alt="" /></span>
+                                            <p class="mb-0">See which properties you have contacted</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="logim-form-sec">
+                                <h3 class="login-form-title mb-30">Enter The Email Phone Number</h3>
+                                <div class="login-form-fields-sec">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control custom-form-control" placeholder="Enter Email" name="email" id="email" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control custom-form-control" placeholder="Password" name="password" id="password" />
+                                    </div>
+                                    <a href="#" class="btn-theme-login green">Login</a>
+                                    <div class="position-relative text-center mb-3">
+                                        <span class="or-divider">or</span>
+                                    </div>
+                                    <a href="/" class="btn-theme-login facebook">
+                                        <span class="me-3"><img src="/images/facebook-f.svg" alt="" /></span>
+                                        Sign in with Facebook
+                                    </a>
+                                    <a href="/" class="btn-theme-login google">
+                                        <span class="me-3"><img src="/images/google-symbol 1.svg" alt="" /></span>
+                                        Sign in with Google
+                                    </a>
+                                    <div class="login-bottom-content text-center">
+                                        <p>
+                                            By registering you accept our
+                                            <a href="/">Terms & Conditions</a> and our
+                                            <a href="/">Privacy Policy</a>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/Login.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
