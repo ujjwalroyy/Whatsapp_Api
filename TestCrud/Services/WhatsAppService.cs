@@ -1,47 +1,44 @@
 ﻿
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using TestCrud.Models;
 using TestCrud.Dto;
+using TestCrud.Models;
 
 namespace TestCrud.Services
 {
     public class WhatsAppService
     {
-        private readonly string token = "EAAKdVbWnJF0BOZBmX87Gw9ckB2LLmP8iDHjlgGHEeWpkEJwWlcV1kOlrtsF3CNcNZCE2BP6zdLhokMIGd6bmriWeq4M4HM3uQCJL7PSWSPbRiptVkhbz1BVgEMwtWddQiMNIUvZCbezmkvZA2icMnLdEePHhkrVm1M8bGvcc2ss46fh6SLurc8s2MznbaQMHMzZALoC5mSzsQ6pg7vfl7zLp7ZCGQ7eSPoAnTkKbizKZBkdSQZDZD";
+        private readonly string token = "EAAKdVbWnJF0BPJnHrrSBruGIDV2ZBFn1WVRF2FK1dwOBaa5NXr9nfVxBSxSu0G7A0Y6s8L0HG81E7PfE5sfS6ZCtCICGi1iEmfhAttdHImPbHSTflYaDDLORVS2g4e3kkGciuCZAZCl6wlRQgORSETs0s41iuj1LBRINzrVP8tDAdIlziuOit0TCKmly5fzURQXearDcTyzip6arNgNTYDtkoOBmpoFZB5SLhZCZA5K38i6JAZDZD";
         private readonly string phoneNumberId = "604453616094805";
+
+        private HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
 
         public async Task<string> SendMessage(WhatsAppMessage message)
         {
-            using (var client = new HttpClient())
+            var payload = new
             {
-                client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-                var payload = new
+                messaging_product = "whatsapp",
+                to = message.PhoneNumber,
+                type = "template",
+                template = new
                 {
-                    messaging_product = "whatsapp",
-                    to = message.PhoneNumber,
-                    type = "template",
-                    template = new
-                    {
-                        name = message.TemplateName,
-                        language = new { code = message.LanguageCode }
-                    }
-                };
+                    name = message.TemplateName,
+                    language = new { code = message.LanguageCode }
+                }
+            };
 
-                var json = JsonConvert.SerializeObject(payload);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync(
-                    $"https://graph.facebook.com/v19.0/{phoneNumberId}/messages", content);
-
-                return await response.Content.ReadAsStringAsync();
-            }
+            return await SendToWhatsAppApiAsync(payload);
         }
+
         public async Task<string> SendImageMessageAsync(SendMediaRequest request)
         {
             var payload = new
@@ -78,23 +75,36 @@ namespace TestCrud.Services
 
         private async Task<string> SendToWhatsAppApiAsync(object payload)
         {
-            using (var client = new HttpClient())
+            try
             {
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
+                using (var client = CreateHttpClient())
+                {
+                    var content = new StringContent(
+                        JsonConvert.SerializeObject(payload),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
 
-                var content = new StringContent(
-                    JsonConvert.SerializeObject(payload),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+                    var response = await client.PostAsync(
+                        $"https://graph.facebook.com/v19.0/{phoneNumberId}/messages",
+                        content
+                    );
 
-                var response = await client.PostAsync(
-                    $"https://graph.facebook.com/v19.0/{phoneNumberId}/messages",
-                    content
-                );
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-                return await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return $"Success: {responseContent}";
+                    }
+                    else
+                    {
+                        return $"Error: {response.StatusCode} - {responseContent}";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Exception: {ex.Message}";
             }
         }
 

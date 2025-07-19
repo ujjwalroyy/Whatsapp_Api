@@ -1,0 +1,191 @@
+@{
+    ViewBag.Title = "Send WhatsApp Message";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Send WhatsApp Message</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Send WhatsApp Template Message</h5>
+            <form id="sendTemplateForm">
+                <div class="mb-3">
+                    <label for="templatePhoneNumber" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="templatePhoneNumber" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="templateName" class="form-label">Template Name</label>
+                    <input type="text" class="form-control" id="templateName" placeholder="e.g., hello_world" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="languageCode" class="form-label">Language Code</label>
+                    <input type="text" class="form-control" id="languageCode" placeholder="e.g., en_US" required />
+                </div>
+
+                <button type="submit" class="btn btn-warning">Send Template Message</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="sendTextForm">
+                <div class="mb-3">
+                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phoneNumber" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="textMessage" class="form-label">Text Message</label>
+                    <textarea class="form-control" id="textMessage" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Send Text</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="sendImageForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="imagePhoneNumber" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="imagePhoneNumber" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">Select Image</label>
+                    <input type="file" class="form-control" id="imageFile" accept="image/*" required />
+                </div>
+
+                <button type="submit" class="btn btn-success">Send Image</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="sendFileForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="filePhoneNumber" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="filePhoneNumber" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="docFile" class="form-label">Select File</label>
+                    <input type="file" class="form-control" id="docFile" required />
+                </div>
+
+                <button type="submit" class="btn btn-dark">Send File</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+
+        $('#sendTemplateForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const phone = $('#templatePhoneNumber').val();
+            const template = $('#templateName').val();
+            const lang = $('#languageCode').val();
+
+            $.ajax({
+                url: '/api/whatsapp/send',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    PhoneNumber: phone,
+                    TemplateName: template,
+                    LanguageCode: lang
+                }),
+                success: function (res) {
+                    alert("Template message sent successfully!\n\n" + res);
+                },
+                error: function (err) {
+                    alert("Failed to send template message.");
+                    console.log("err", err);
+                }
+            });
+        });
+
+        $('#sendTextForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var data = {
+                PhoneNumber: $('#phoneNumber').val(),
+                Message: $('#textMessage').val()
+            };
+
+            $.ajax({
+                url: '/api/whatsapp/send',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (res) {
+                    alert('Text message sent!');
+                },
+                error: function (err) {
+                    alert('Failed to send message.');
+                }
+            });
+            
+        });
+
+        $('#sendImageForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var file = $('#imageFile')[0].files[0];
+            var phone = $('#imagePhoneNumber').val();
+
+            uploadFileToGetMediaId(file).then(function (mediaId) {
+                $.ajax({
+                    url: '/api/whatsapp/send-image',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ PhoneNumber: phone, MediaId: mediaId }),
+                    success: function () {
+                        alert('Image sent successfully.');
+                    }
+                });
+            });
+        });
+
+
+        $('#sendFileForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var file = $('#docFile')[0].files[0];
+            var phone = $('#filePhoneNumber').val();
+
+            uploadFileToGetMediaId(file).then(function (mediaId) {
+                $.ajax({
+                    url: '/api/whatsapp/send-file',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ PhoneNumber: phone, MediaId: mediaId }),
+                    success: function () {
+                        alert('File sent successfully.');
+                    }
+                });
+            });
+        });
+
+        // Simulated file upload — replace with your actual logic to get MediaId from WhatsApp
+        function uploadFileToGetMediaId(file) {
+            return new Promise((resolve, reject) => {
+                // Simulate Media ID generation
+                setTimeout(() => {
+                    resolve("mock-media-id-123"); // Replace with actual media ID from your upload API
+                }, 1000);
+            });
+        }
+    </script>
+}

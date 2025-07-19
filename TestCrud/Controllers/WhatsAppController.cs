@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,9 +16,10 @@ namespace TestCrud.Controllers
     {
         private readonly WhatsAppService _service = new WhatsAppService();
 
+     
         [HttpPost]
         [Route("send")]
-        public async Task<IHttpActionResult> Send(WhatsAppMessage message)
+        public async Task<IHttpActionResult> Send( WhatsAppMessage message)
         {
             if (message == null || string.IsNullOrEmpty(message.PhoneNumber))
                 return BadRequest("Phone number is required");
@@ -68,11 +70,21 @@ namespace TestCrud.Controllers
 
         [HttpPost]
         [Route("webhooks")]
-        public async Task<IHttpActionResult> ReceiveWebhook([FromBody] dynamic data)
+        public async Task<IHttpActionResult> ReceiveWebhook([FromBody] object data)
         {
-            string json = data.ToString();
-            System.IO.File.WriteAllText(HttpContext.Current.Server.MapPath("~/App_Data/webhook_log.json"), json);
-            return await Task.FromResult(Ok());
+            var json = data?.ToString() ?? string.Empty;
+
+            // Save webhook JSON to a file for logging
+            string filePath = HttpContext.Current.Server.MapPath("~/App_Data/webhook_log.json");
+            string folderPath = HttpContext.Current.Server.MapPath("~/App_Data");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            File.WriteAllText(filePath, json);
+
+            return await Task.FromResult(Ok("Webhook received"));
         }
         
     }
